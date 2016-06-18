@@ -1,0 +1,25 @@
+phase1:
+  box:
+    id: golang:1.6.2-alpine
+    cmd: /bin/sh
+  steps:
+    - wercker/setup-go-workspace:
+      package-dir: github.com/youyo/wercker-test
+    - script:
+      name: Build
+      code: |-
+        go build
+        mv wercker-test ${WERCKER_OUTPUT_DIR}/wercker-test
+        grep -w 'const Version string' version.go | awk -F '"' '{print "v"$2}' > ${WERCKER_OUTPUT_DIR}/version.txt
+
+phase2:
+  box:
+    id: golang:1.6.2-alpine
+    cmd: /bin/sh
+  steps:
+    - script:
+      name: Deploy
+      code: |-
+        echo 'Write deploy code.'
+        ls -ahl
+        # ghr -t ${GITHUB_TOKEN} -u youyo -r wercker-test --replace `cat version.txt` wercker-test
